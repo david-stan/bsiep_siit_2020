@@ -1,0 +1,50 @@
+package drools.rules;
+
+import com.mssimulator.domain.UnsuccessfulLoginEvent;
+import com.mssimulator.domain.Log;
+import com.mssimulator.domain.LogType;
+
+agenda-group "alarm"
+
+rule "Unsuccessful login with username"
+    lock-on-active true
+    when
+        $ule1: UnsuccessfulLoginEvent();
+        Number(intValue >= 3) from accumulate(
+             $ule2: UnsuccessfulLoginEvent(
+                 //this != $ule1,
+                 this.username == $ule1.username,
+                 this meets[20s] $ule1
+             ),
+             count($ule2)
+         );
+    then
+        $ule1.setUsernameRuleTriggered(true);
+        update($ule1);
+end
+
+rule "Unsuccessful login with ip"
+    lock-on-active true
+    when
+        $ule1: UnsuccessfulLoginEvent();
+        Number(intValue >= 3) from accumulate(
+             $ule2: UnsuccessfulLoginEvent(
+                 this != $ule1,
+                 this.ip == $ule1.ip,
+                 this meets[20s] $ule1
+             ),
+             count($ule2)
+         );
+    then
+        $ule1.setIpRuleTriggered(true);
+        update($ule1);
+end
+
+rule "Occurrence of ERROR log type"
+    lock-on-active true
+    when
+        $log: Log(type == LogType.ERROR);
+    then
+        $log.setErrorLogRuleTriggered(true);
+        update($log);
+end

@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: ms-siem-agent-spring
+  cloud:
+    config:
+      uri: http://${CONFIG_HOST:localhost}:8888
+

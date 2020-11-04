@@ -1,0 +1,19 @@
+<mat-toolbar color="primary">
+  <mat-toolbar-row class="ts-u-display--flex ts-u-justify--space-between">
+    <button mat-button routerLink="/"> DefenceFirst </button>
+    
+    <span *ngIf="!isUserLoggedIn">
+      <button id="register" mat-button routerLink="/register">Register</button>
+      <button id="login" class="login-btn" mat-button routerLink="/login">Login</button>
+    </span>
+    <span *ngIf="isAdmin">
+      <button id="logs" mat-button routerLink="/logs">View Logs</button>
+      <button id="certificates" mat-button routerLink="/certificates">Certificates</button>
+      <button id="logout" mat-button (click)="logOut()">Logout</button>
+    </span>
+    <span *ngIf="isUser">
+      <button id="logs" mat-button routerLink="/logs">View Logs</button>
+      <button id="logout" mat-button (click)="logOut()">Logout</button>
+    </span>
+  </mat-toolbar-row>
+</mat-toolbar>

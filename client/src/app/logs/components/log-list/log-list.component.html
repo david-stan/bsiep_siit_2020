@@ -1,0 +1,82 @@
+<mat-form-field style="margin-top: 1em; margin-left: 0.5em">
+    <mat-label>Filter by log type</mat-label>
+    <mat-select #logTypeFilter (selectionChange)="doLogTypeFilter(logTypeFilter.selected.value)">
+        <mat-option value="ALL">ALL</mat-option>
+      <mat-option value="INFO">INFO</mat-option>
+      <mat-option value="WARN">WARN</mat-option>
+      <mat-option value="ERROR">ERROR</mat-option>
+      <mat-option value="TRACE">TRACE</mat-option>
+      <mat-option value="DEBUG">DEBUG</mat-option>
+      <mat-option value="FATAL">FATAL</mat-option>
+    </mat-select>
+</mat-form-field>
+
+<form [formGroup]="batchForm" (ngSubmit)="batchForm.valid && setBatchValue()" novalidate>
+
+    <mat-form-field style="margin-left: 1em; width: 300px;">
+        <mat-label>Enter batch value: 0 (real-time) - 20000</mat-label>
+        <input id="batchValue"
+                matInput
+                type="text"
+                min="0"
+                formControlName="batchValue"
+                max="20000"
+                pattern="\d*"
+                maxlength="5"/>
+    </mat-form-field>
+
+    
+    <button mat-button type="submit" 
+    id="submit"
+    class="mat-raised-button mat-primary" 
+    [disabled]="!batchForm.valid">Set batch value</button>
+</form>
+
+<form [formGroup]="regexForm" (ngSubmit)="regexForm.valid && setRegex()" novalidate>
+
+    <mat-form-field style="margin-left: 1em; width: 300px;">
+        <mat-label>Enter regex</mat-label>
+        <input id="regexValue"
+                matInput
+                formControlName="regexValue"
+                type="text"
+                />
+    </mat-form-field>
+
+    
+    <button mat-button type="submit" 
+    id="submit"
+    class="mat-raised-button mat-primary" 
+    [disabled]="!regexForm.valid">Set regex</button>
+</form>
+
+<table mat-table style="width: 100%; margin-top: 1em;" class="mat-elevation-z8" [dataSource]="dataSource" class="mat-elevation-z8" matSort>
+    <ng-container matColumnDef="timestamp">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Timestamp</th>
+        <td mat-cell *matCellDef="let log" style="width: 200px;">{{log.timestamp}}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="level">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Level</th>
+        <td mat-cell *matCellDef="let log" [ngStyle]="{'background-color': colorLogLevelInTable(log.type)}" style="padding-left: 20px;">
+            {{log.type}}    
+        </td>
+    </ng-container>
+
+    <ng-container matColumnDef="sourceName">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Source name</th>
+        <td mat-cell *matCellDef="let log" style="padding-left: 20px;">{{log.sourceName}}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="message">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Message</th>
+        <td mat-cell *matCellDef="let log"> {{log.message}}</td>
+    </ng-container>
+
+
+    <tr mat-header-row *matHeaderRowDef="getDisplayedColumns()"></tr>
+
+    <tr mat-row *matRowDef="let row; columns: getDisplayedColumns()"></tr>
+
+</table>
+

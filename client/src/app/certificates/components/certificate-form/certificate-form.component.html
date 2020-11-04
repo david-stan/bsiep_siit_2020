@@ -1,0 +1,56 @@
+<div class="medium-list">
+  <div class="list-viewer-wrapper">
+    <div id="form-title" class="list-header-title">Add Certificate</div>
+
+    <form [formGroup]="certificateForm" (ngSubmit)="certificateForm.valid && onFormSubmit()" novalidate>
+      <div class="form-container">
+        <!-- <mat-form-field>
+          <input id="issuercn"
+                  matInput
+                  type="text"
+                  formControlName="issuerCN"
+                  placeholder="Enter IssuerCN" />
+        </mat-form-field> -->
+        <mat-form-field>
+          <mat-label>IssuerCN</mat-label>
+          <mat-select formControlName="issuerCN">
+            <mat-option *ngFor="let organization of organizations" [value]="organization.name">
+              {{organization.name}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field>
+          <input id="subjectcn"
+                 matInput
+                 type="text"
+                 formControlName="subjectCN"
+                 placeholder="Enter SubjectCN (must be unique)" />
+        </mat-form-field>
+
+        <mat-form-field>
+          <input id="yearsValid"
+                 matInput
+                 type="text"
+                 formControlName="yearsValid"
+                 placeholder="Enter number of years valid (1 - 25)" 
+                 min="1"
+                 max="25"
+                 pattern="\d*"
+                 maxlength="2"/>
+        </mat-form-field>
+
+        <label class="ts-u-display--flex ts-u-justify--space-between ts-u-margin-bottom--xs">
+          <div>
+            <input type="checkbox" formControlName="isCA">
+            Is CA?
+          </div>
+        </label>
+
+        <button mat-button type="submit" 
+                id="submit"
+                class="mat-raised-button mat-primary" 
+                [disabled]="!certificateForm.valid">Submit</button>
+      </div>
+    </form>
+  </div>
+</div>

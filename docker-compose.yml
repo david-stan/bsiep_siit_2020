@@ -1,0 +1,127 @@
+version: '3'
+services:
+  db:
+    image: mysql:5.7
+    deploy:
+      restart_policy:
+        condition: any
+    volumes:
+      - mysql_data:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: 'bsiep'
+      MYSQL_USER: 'admin'
+      MYSQL_PASSWORD: 'admin'
+      MYSQL_ROOT_PASSWORD: 'root'
+    ports:
+      - '3306:3306'
+    networks:
+      - defencefirstnet
+  config-server:
+    build: ./ms-config-server
+    environment:
+      - DB_HOST=mysqlhost
+    ports:
+      - '8888:8888'
+    networks:
+      - defencefirstnet
+  registry:
+    build: ./ms-registry
+    environment:
+      - DB_HOST=mysqlhost
+      - CONFIG_HOST=config
+    ports:
+      - '8061:8061'
+    links:
+      - "config-server:config"
+    depends_on:
+      - config-server
+    networks:
+      - defencefirstnet
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://config:8888"]
+        interval: 30s
+        timeout: 10s
+        retries: 10
+  # pki:
+  #   build: ./ms-pki
+  #   environment:
+  #     - DB_HOST=mysqlhost
+  #     - CONFIG_HOST=config
+  #     - REGISTRY_HOST=eureka
+  #   ports:
+  #     - '9091:9091'
+  #   links:
+  #     - "db:mysqlhost"
+  #     - "config-server:config"
+  #     - "registry:eureka"
+  #   depends_on:
+  #     - config-server
+  #   healthcheck:
+  #       test: ["CMD", "curl", "-f", "http://config:8061"]
+  #       interval: 30s
+  #       timeout: 10s
+  #       retries: 10
+  siem-center:
+    build: ./ms-siem-center
+    environment:
+      - DB_HOST=mysqlhost
+      - CONFIG_HOST=config
+      - REGISTRY_HOST=registry
+    links:
+      - "db:mysqlhost"
+      - "config-server:config"
+      - "registry:registry"
+    ports:
+      - '9090:9090'
+    networks:
+      - defencefirstnet
+    depends_on:
+      - config-server
+      - registry
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://config:8061"]
+        interval: 30s
+        timeout: 10s
+        retries: 10
+  # siem-agent:
+  #   build: ./ms-siem-agent
+  #   depends_on:
+  #     - siem-center
+  #   links:
+  #     - "siem-center:server"
+  #   environment:
+  #     - SERVER_HOST=server
+  #   healthcheck:
+  #       test: ["CMD", "curl", "-f", "http://server:9090"]
+  #       interval: 30s
+  #       timeout: 10s
+  #       retries: 10
+  # client:
+  #   build: ./client
+  #   ports:
+  #     - '80:80'
+  #   links:
+  #     - "iam:auth"
+  #   environment:
+  #     - AUTH_HOST=auth
+  iam:
+    build: ./iam
+    environment:
+      KEYCLOAK_IMPORT: /app/iam/realm-export.json
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+      DB_VENDOR: H2
+    ports:
+      - 8080:8080
+      - 8446:8443
+    volumes:
+      - keycloak-db:/opt/jboss/keycloak/standalone/data
+      - ./iam/realm-export.json:/app/iam/realm-export.json
+      - ./client/ssl/server.crt:/etc/x509/https/tls.crt
+      - ./client/ssl/server.key:/etc/x509/https/tls.key
+volumes:
+  mysql_data:
+      driver: local
+  keycloak-db:
+networks:
+  defencefirstnet:

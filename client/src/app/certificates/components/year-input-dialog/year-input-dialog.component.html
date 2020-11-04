@@ -1,0 +1,14 @@
+
+<div mat-dialog-content>
+  {{message}} 
+  <form [formGroup]="yearForm" (ngSubmit)="yearForm.valid && onFormSubmit()" novalidate style="height: 120px;">
+    <div class="form-container">
+      <mat-form-field>
+        <input matInput formControlName="year" placeholder="Extend for: " id="year">
+      </mat-form-field>
+    </div>
+    <div  fxLayout fxLayoutAlign="center center" mat-dialog-actions>
+      <button mat-button (click)="onCancelClick()">Cancel</button>
+      <button mat-button type="submit" id="yearInputDialogConfirmButton" cdkFocusInitial>Confirm</button>
+    </div>
+  </form>
